@@ -75,6 +75,10 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 min: 6
             }
+        },
+        image: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         sequelize,
