@@ -93,3 +93,19 @@ export function validateProperty(property, key) {
     });
     return schema.validate(property);
 }
+
+export function validatePassword(password) {
+    const schema = Joi.object({
+       old_password: Joi.string().min(6).required(),
+       new_password: Joi.string().min(6).required()
+    });
+    return schema.validate(password);
+}
+
+export function validateLogin(user) {
+    const schema = Joi.object({
+       username: Joi.string().required(),
+       pasword: Joi.string().required().min(6)
+    });
+    return schema.validate(user);
+}
