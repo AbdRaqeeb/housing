@@ -7,6 +7,7 @@ import {error} from "./middleware/error";
 
 // import modules
 import AdminRoutes from './modules/admin/routes/AdminRoutes';
+import AuthRoutes from './modules/auth/routes/AuthRoutes';
 
 const app = express();
 app.use(express.json({extended: false}));
@@ -22,6 +23,7 @@ config(process.env.CLOUD_NAME, process.env.API_KEY, process.env.API_SECRET);
 
 
 app.use('/api/v1/admin', AdminRoutes);
+app.use('/api/v1/auth', AuthRoutes);
 
 
 app.get('/', (req, res) => {

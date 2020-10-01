@@ -32,6 +32,7 @@ class AdminController {
             });
 
             if (admin) return res.status(400).json({
+                error: true,
                 msg: 'Admin already exists'
             });
 
@@ -60,6 +61,7 @@ class AdminController {
             const token = generateToken(payload);
 
             res.status(201).json({
+                error: false,
                 token
             });
         } catch (e) {
@@ -79,6 +81,7 @@ class AdminController {
      * */
     static async uploadProfilePhoto(req, res, next) {
         if (!req.files || Object.keys(req.files).length === 0) return res.status(400).json({
+            error: true,
             msg: 'Please upload an image'
         });
 
@@ -93,6 +96,7 @@ class AdminController {
 
 
             return res.status(200).json({
+                error: false,
                 msg: 'User updated successfully',
                 admin
             })
@@ -120,6 +124,7 @@ class AdminController {
             admin = await admin.update(req.body);
 
             return res.status(200).json({
+                error: false,
                 msg: 'Profile updated successfully',
                 admin
             })
@@ -149,6 +154,7 @@ class AdminController {
             const validPassword = bcrypt.compareSync(old_password, admin.password);
 
             if (!validPassword) return res.status(400).json({
+                error: true,
                 msg: 'Password mismatch'
             });
 
@@ -158,7 +164,8 @@ class AdminController {
             await admin.save();
 
             return res.status(200).json({
-                msg: 'Password changed successfully',
+                error: false,
+                msg: 'Password changed successfully'
             });
 
         } catch (e) {
