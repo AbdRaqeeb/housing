@@ -1,75 +1,76 @@
 import bcrypt from 'bcryptjs';
-import {Admin} from '../../../database/models';
-import {validateAdmin, validatePassword} from "../../../middleware/validate";
+import {User} from '../../../database/models';
+import {validateUser, validatePassword} from "../../../middleware/validate";
 import {generateToken} from "../../../middleware/token";
-import {uploadImage} from 'cloudinary-simple-upload';
 import folders from "../../../helpers/folders";
+import {uploadImage} from 'cloudinary-simple-upload';
 
 /**
- * Admin controller class
- * @desc Admin registeration, change pasword, update profile
+ * User Controller
+ * @desc register user, update profile, upload profile photo, change password
  * */
-class AdminController {
+class UserController {
     /**
      * @static
-     * @desc Register admin
+     * @desc    Register a customer
      * @param {object} req express request object
      * @param {object} res express response object
      * @param next
      * @returns {token} access token
+     * @access Public
      * */
-    static async registerAdmin(req, res, next) {
-        const {error} = validateAdmin(req.body);
+    static async registerCustomer(req, res, next) {
+        const {error} = validateUser(req.body);
         if (error) return res.status(400).json(error.details[0].message);
 
-        const {username, firstname, lastname, email, password} = req.body;
+        const {firstname, lastname, username, email, password} = req.body;
 
         try {
-            let admin = await Admin.findOne({
+            let user = await User.findOne({
                 where: {
-                    username
+                    email
                 }
             });
 
-            if (admin) return res.status(400).json({
+            if (user) return res.status(400).json({
                 error: true,
-                msg: 'Admin already exists'
+                msg: 'User already exists'
             });
 
-            admin = Admin.build({
-                username,
+            user = User.build({
                 firstname,
-                lastname,
                 email,
-                password
+                lastname,
+                username,
+                password,
+                role: 'user'
             });
 
             // Hash password before saving
             const salt = bcrypt.genSaltSync(10);
-            admin.password = bcrypt.hashSync(password, salt);
+            user.password = bcrypt.hashSync(password, salt);
 
-            await admin.save();
+            await user.save();
 
             const payload = {
-                id: admin.id,
-                firstname: admin.firstname,
-                lastname: admin.lastname,
-                role: admin.role,
-                email: admin.email
+                id: user.id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                role: user.role,
+                email: user.email
             };
 
             // generate token
             const token = generateToken(payload);
 
-            res.status(201).json({
+            res.status(200).json({
                 error: false,
                 token
             });
         } catch (e) {
-           next(e);
+            next(e);
         }
     }
-
 
     /**
      * @static
@@ -77,7 +78,7 @@ class AdminController {
      * @param {object} req express request object
      * @param {object} res express response object
      * @param next
-     * @returns {object} admin profile
+     * @returns {object} user profile
      * @access Private
      * */
     static async uploadProfilePhoto(req, res, next) {
@@ -86,20 +87,19 @@ class AdminController {
             msg: 'Please upload an image'
         });
 
-        const image_url = await uploadImage(req.files.image, folders.admin);
-
+        const image_url = await uploadImage(req.files.image, folders.users);
         const image = image_url.secure_url;
-
         try {
-            let admin = await Admin.findByPk(req.user.id);
+            let user = await User.findByPk(req.user.id);
 
-            admin = await admin.update({image});
+            await user.update({image});
 
+            user = await User.findByPk(user.id);
 
             return res.status(200).json({
                 error: false,
                 msg: 'User updated successfully',
-                admin
+                user
             })
         } catch (e) {
             next(e);
@@ -116,18 +116,20 @@ class AdminController {
      * @access Private
      * */
     static async updateProfile(req, res, next) {
-        const {error} = validateAdmin(req.body, 'update');
+        const {error} = validateUser(req.body, 'update');
         if (error) return res.status(400).json(error.details[0].message);
 
         try {
-            let admin = await Admin.findByPk(req.user.id);
+            let user = await User.findByPk(req.user.id);
 
-            admin = await admin.update(req.body);
+            await user.update(req.body);
+
+            user = await User.findByPk(user.id);
 
             return res.status(200).json({
                 error: false,
                 msg: 'Profile updated successfully',
-                admin
+                user
             })
         } catch (e) {
             next(e);
@@ -150,9 +152,9 @@ class AdminController {
 
         const {old_password, new_password} = req.body;
         try {
-            const admin = await Admin.findByPk(req.user.id);
+            const user = await User.findByPk(req.user.id);
 
-            const validPassword = bcrypt.compareSync(old_password, admin.password);
+            const validPassword = bcrypt.compareSync(old_password, user.password);
 
             if (!validPassword) return res.status(400).json({
                 error: true,
@@ -160,13 +162,13 @@ class AdminController {
             });
 
             const salt = bcrypt.genSaltSync(10);
-            admin.password = bcrypt.hashSync(new_password, salt);
+            user.password = bcrypt.hashSync(new_password, salt);
 
-            await admin.save();
+            await user.save();
 
             return res.status(200).json({
                 error: false,
-                msg: 'Password changed successfully'
+                msg: 'Password changed successfully',
             });
 
         } catch (e) {
@@ -174,6 +176,7 @@ class AdminController {
         }
 
     }
+
 }
 
-export default AdminController;
+export default UserController
