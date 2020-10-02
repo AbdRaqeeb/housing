@@ -81,7 +81,6 @@ export function validateProperty(property, key) {
        images: Joi.any().optional(),
        reference: key ? Joi.string().optional() : Joi.string().required(),
        isPaid: key ? Joi.boolean().optional() : Joi.boolean().required(),
-       user_id: Joi.number().required(),
        build_age: key ? Joi.string().optional() : Joi.string().required(),
        bathrooms: key ? Joi.number().optional() : Joi.number().required(),
        bedrooms: key ? Joi.number().optional() : Joi.number().required(),
@@ -105,7 +104,7 @@ export function validatePassword(password) {
 export function validateLogin(user) {
     const schema = Joi.object({
        username: Joi.string().required(),
-       pasword: Joi.string().required().min(6)
+       password: Joi.string().required().min(6)
     });
     return schema.validate(user);
 }

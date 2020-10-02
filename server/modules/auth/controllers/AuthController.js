@@ -44,7 +44,8 @@ class AuthController {
 
             const payload = {
                 id: user.user_id,
-                name: user.name,
+                firstname: user.firstname,
+                lastname: user.lastname,
                 email: user.email,
                 role: user.role
             };
@@ -98,7 +99,8 @@ class AuthController {
 
             const payload = {
                 id: admin.admin_id,
-                name: admin.name,
+                firstname: admin.firstname,
+                lastname: admin.lastname,
                 email: admin.email,
                 role: admin.role
             };
