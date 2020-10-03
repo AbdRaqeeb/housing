@@ -28,24 +28,17 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        message: {
+            type: DataTypes.TEXT,
+            allowNull: false
+        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                isEmail: true
-            }
-        },
-        review: {
-            type: DataTypes.TEXT,
             allowNull: false
         },
         property_id: {
             type: DataTypes.INTEGER,
             allowNull: false
-        },
-        images: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            allowNull: true
         }
     }, {
         sequelize,

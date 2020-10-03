@@ -31,24 +31,23 @@ export function validateUser(user, key) {
 
 export function validateInquiry(inquiry) {
     const schema = Joi.object({
-       name: Joi.string().required(),
-       email: Joi.string().required(),
-       phone: Joi.string().required(),
-       message: Joi.string().required(),
-       user_id: Joi.string().required(),
-       property_id: Joi.string().required()
+        name: Joi.string().required(),
+        email: Joi.string().required(),
+        phone: Joi.string().required(),
+        message: Joi.string().required(),
+        user_id: Joi.string().required(),
+        property_id: Joi.string().required()
     });
     return schema.validate(inquiry)
 }
 
 export function validateReview(review) {
     const schema = Joi.object({
-       rating: Joi.number().required(),
-       name: Joi.string().required(),
-       email: Joi.string().required().email(),
-       review: Joi.string().required(),
-       property_id: Joi.string().required(),
-       images: Joi.any().optional()
+        rating: Joi.number().required(),
+        name: Joi.string().required(),
+        message: Joi.string().required(),
+        email: Joi.string().email().required(),
+        property_id: Joi.string().required()
     });
     return schema.validate(review);
 }
@@ -69,11 +68,11 @@ export function validateTour(tour) {
 
 export function validateProperty(property, key) {
     const schema = Joi.object({
-       title: key ? Joi.string().optional() : Joi.string().required(),
-       description: Joi.string().optional(),
-       status: Joi.string().optional(),
-       room: key ? Joi.number().optional() : Joi.string().required(),
-       type: Joi.string().optional(),
+        title: key ? Joi.string().optional() : Joi.string().required(),
+        description: Joi.string().optional(),
+        status: Joi.string().optional(),
+        room: key ? Joi.number().optional() : Joi.string().required(),
+        type: Joi.string().optional(),
         price: key ? Joi.number().optional() : Joi.number().required(),
         area: key ? Joi.string().optional() : Joi.string().required(),
         amenities: key ? Joi.array().optional() : Joi.array().required(),
@@ -95,16 +94,16 @@ export function validateProperty(property, key) {
 
 export function validatePassword(password) {
     const schema = Joi.object({
-       old_password: Joi.string().min(6).required(),
-       new_password: Joi.string().min(6).required()
+        old_password: Joi.string().min(6).required(),
+        new_password: Joi.string().min(6).required()
     });
     return schema.validate(password);
 }
 
 export function validateLogin(user) {
     const schema = Joi.object({
-       username: Joi.string().required(),
-       password: Joi.string().required().min(6)
+        username: Joi.string().required(),
+        password: Joi.string().required().min(6)
     });
     return schema.validate(user);
 }
