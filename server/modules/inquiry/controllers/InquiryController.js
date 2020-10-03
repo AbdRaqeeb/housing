@@ -1,5 +1,6 @@
 import {Property, Inquiry, User} from '../../../database/models';
 import {validateInquiry} from "../../../middleware/validate";
+import {addToCache} from "../../../middleware/cache";
 
 /**
  * Inquiry controllers
@@ -107,6 +108,9 @@ class InquiryController {
                 error: true,
                 msg: 'Permission denied'
             });
+
+            // Add to cache
+            await addToCache(req.originalUrl, inquiry);
 
             return res.status(200).json({
                 error: false,

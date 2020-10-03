@@ -10,7 +10,8 @@ import AdminRoutes from './modules/admin/routes/AdminRoutes';
 import AuthRoutes from './modules/auth/routes/AuthRoutes';
 import UserRoutes from './modules/user/routes/UserRoutes';
 import PropertyRoutes from './modules/property/routes/PropertyRoutes';
-import InquiryRoutes from './modules/Inquiry/routes/InquiryRoutes';
+import InquiryRoutes from './modules/inquiry/routes/InquiryRoutes';
+import TourRoutes from './modules/tour/routes/TourRoutes';
 
 const app = express();
 app.use(express.json({extended: false}));
@@ -30,6 +31,7 @@ app.use('/api/v1/auth', AuthRoutes);
 app.use('/api/v1/user', UserRoutes);
 app.use('/api/v1/property', PropertyRoutes);
 app.use('/api/v1/inquiry', InquiryRoutes);
+app.use('/api/v1/tour', TourRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).send('Welcome to the housing app');
