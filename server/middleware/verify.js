@@ -1,4 +1,4 @@
-import { verify } from 'jsonwebtoken';
+import {verify} from 'jsonwebtoken';
 
 export default function(req, res, next) {
     const token = req.header('x-auth-token');
