@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate({Property, User}) {
+        static associate({Property, User, Payment}) {
             // define association here
             Tour.belongsTo(Property, {
                 foreignKey: 'property_id',
@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
 
             Tour.belongsTo(User, {
                 foreignKey: 'user_id',
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
+            });
+
+            Tour.hasOne(Payment, {
+                foreignKey: 'tour_id',
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE'
             });
