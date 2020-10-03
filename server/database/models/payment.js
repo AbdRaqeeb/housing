@@ -3,15 +3,27 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class PropertyInformation extends Model {
+    class Payment extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate({Property}) {
+        static associate({Tour, User, Property}) {
             // define association here
-            PropertyInformation.belongsTo(Property, {
+            Payment.belongsTo(Tour, {
+                foreignKey: 'tour_id',
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE'
+            });
+
+            Payment.belongsTo(User, {
+                foreignKey: 'user_id',
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE'
+            });
+
+            Payment.belongsTo(Property, {
                 foreignKey: 'property_id',
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE'
@@ -19,23 +31,19 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
 
-    PropertyInformation.init({
-        build_age: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        bathrooms: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        bedrooms: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        bq: {
-            type: DataTypes.BOOLEAN,
+    Payment.init({
+        amount: {
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
-            defaultValue: false
+            defaultValue: 0.00
+        },
+        tour_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         },
         property_id: {
             type: DataTypes.INTEGER,
@@ -43,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'PropertyInformation',
+        modelName: 'Payment',
     });
-    return PropertyInformation;
+    return Payment;
 };

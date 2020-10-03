@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate({User, Inquiry, Tour, PropertyInformation, PropertyLocation, Review}) {
+        static associate({User, Inquiry, Tour, PropertyInformation, PropertyLocation, Review, Payment}) {
             // define association here
             Property.belongsTo(User, {
                 foreignKey: 'user_id',
@@ -46,8 +46,14 @@ module.exports = (sequelize, DataTypes) => {
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE'
             });
+
+            Property.hasMany(Payment, {
+                foreignKey: 'property_id',
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE'
+            });
         }
-    };
+    }
     Property.init({
         property_id: {
             type: DataTypes.INTEGER,
