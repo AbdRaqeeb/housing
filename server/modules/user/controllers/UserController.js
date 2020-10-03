@@ -19,7 +19,7 @@ class UserController {
      * @returns {token} access token
      * @access Public
      * */
-    static async registerCustomer(req, res, next) {
+    static async registerUser(req, res, next) {
         const {error} = validateUser(req.body);
         if (error) return res.status(400).json(error.details[0].message);
 
