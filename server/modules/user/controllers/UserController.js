@@ -228,6 +228,7 @@ class UserController {
             const expiration = new Date();
             expiration.setDate(expiration.getDate() + 1/24);
 
+            // Forget password
             await ResetToken.create({
                 used: 0,
                 token,
