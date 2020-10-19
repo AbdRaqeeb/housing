@@ -4,7 +4,10 @@
   "description": "A real housing app used for searching houses or properties available for rent or sale in any location.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf build && mkdir build",
+    "start": "npm run build && node ./build/index.js",
+    "build-server": "babel -d ./build ./server -s",
+    "build": "npm run clean && npm run build-server",
     "dev": "nodemon --exec babel-node server/index.js"
   },
   "repository": {
