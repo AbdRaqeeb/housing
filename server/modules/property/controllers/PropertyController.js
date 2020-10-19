@@ -35,6 +35,7 @@ class PropertyController {
             amenities,
             build_age,
             bathrooms,
+            bedrooms,
             bq,
             address,
             city,
@@ -56,14 +57,12 @@ class PropertyController {
                 msg: 'Property already added'
             });
 
-            if (!req.files || Object.keys(req.files).length < 2) return res.status(400).json({
+            if (!req.files || req.files.length < 2) return res.status(400).json({
                 error: true,
                 msg: 'Please upload multiple images'
             });
 
-            const images_url = await uploadImages(req.files.images, folders.properties);
-
-            const images = await images_url.map(image_url => image_url.secure_url);
+            const images = await uploadImages(req.files.images, folders.properties, 'owner');
 
             property = await db.sequelize.transaction(async t => {
                 const new_property = await Property.create({
@@ -91,7 +90,7 @@ class PropertyController {
                 await PropertyInformation.create({
                     build_age,
                     bathrooms,
-                    bq,
+                    bq, bedrooms,
                     property_id: new_property.property_id
                 }, {transaction: t});
 
@@ -305,9 +304,7 @@ class PropertyController {
 
 
             // Check if photo was uploaded
-            const images_url = req.files ? await uploadImages(req.files.images, folders.properties) : null;
-
-            const images = (images_url !== null) ? await images_url.map(image_url => image_url.secure_url) : property.images;
+            const images = req.files ? await uploadImages(req.files.images, folders.properties) : property.images;
 
             const data = req.body;
 
@@ -336,7 +333,6 @@ class PropertyController {
      * @returns {object} property
      * */
     static async paidProperty(req, res, next) {
-        const {isPaid} = req.body;
         try {
             let property = await Property.findByPk(req.params.id);
 
@@ -345,7 +341,7 @@ class PropertyController {
                 msg: 'Property not found'
             });
 
-            await property.update({isPaid});
+            await property.update({isPaid: true});
 
             property = await Property.findByPk(req.params.id, {
                 include: [

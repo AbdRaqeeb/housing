@@ -32,6 +32,12 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     Payment.init({
+        payment_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true
+        },
         amount: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,

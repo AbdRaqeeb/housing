@@ -6,7 +6,7 @@ import {checkCache} from "../../../middleware/cache";
 import roles from "../../../helpers/roles";
 
 const router = Router();
-const {bookTour, deleteTour, getTour, getTours, getUserTours, updateTour, viewUserTours} = TourController;
+const {bookTour, deleteTour, getTour, getTours, getUserTours, updateTour, viewUserTours, acceptTour, rejectTour} = TourController;
 
 router.post('/', bookTour);
 router.get('/user/:id', [verify, authorize(roles.Admin)], viewUserTours);
@@ -14,6 +14,8 @@ router.get('/user', verify, getUserTours);
 router.get('/:id', [verify, checkCache], getTour);
 router.get('/', [verify, authorize(roles.Admin)], getTours);
 router.put('/:id', [verify, authorize(roles.Admin)], updateTour);
+router.put('/reject/:id', verify, rejectTour);
+router.put('/accept/:id', verify, acceptTour);
 router.delete('/:id', [verify, authorize(roles.Admin)], deleteTour);
 
 export default router;

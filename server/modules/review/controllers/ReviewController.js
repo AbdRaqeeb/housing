@@ -22,19 +22,7 @@ class ReviewController {
         const {message, name, email, rating, property_id} = req.body;
 
         try {
-            let review = await Review.findOne({
-                where: {
-                    name,
-                    message
-                }
-            });
-
-            if (review) return res.status(400).json({
-                error: true,
-                msg: 'Review already added'
-            });
-
-            review = await Review.build({
+            let review = await Review.build({
                 name,
                 message,
                 rating,

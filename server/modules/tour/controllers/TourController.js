@@ -32,7 +32,7 @@ class TourController {
                     time,
                     user_id,
                     property_id,
-                    charges: 2000.00
+                    charges: 10.00
                 }, {transaction: t});
 
                 await Payment.create({
@@ -205,7 +205,7 @@ class TourController {
      * @returns {object} tour
      * */
     static async updateTour(req, res, next) {
-        const {error} = validateTour(req.body);
+        const {error} = validateTour(req.body, 'update');
         if (error) return res.status(400).json(error.details[0].message);
 
         try {
@@ -217,6 +217,92 @@ class TourController {
             });
 
             await tour.update(req.body);
+
+            tour = await Tour.findByPk(req.params.id, {
+                include: [
+                    {
+                        model: User
+                    },
+                    {
+                        model: Property
+                    }
+                ]
+            });
+
+            return res.status(200).json({
+                error: false,
+                tour
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    /**
+     * @static
+     * @desc  Accept tour
+     * @param {object} req express request object
+     * @param {object} res express response object
+     * @param next
+     * @returns {object} tour
+     * */
+    static async acceptTour(req, res, next) {
+        try {
+            let tour = await Tour.findByPk(req.params.id);
+
+            if (!tour) return res.status(404).json({
+                error: true,
+                msg: 'Tour not found'
+            });
+
+            if (req.user.id !== tour.user_id && req.user.role !== 'admin') return res.status(403).json({
+               msg: 'Permission denied'
+            });
+
+            await tour.update({isAvailable: true});
+
+            tour = await Tour.findByPk(req.params.id, {
+                include: [
+                    {
+                        model: User
+                    },
+                    {
+                        model: Property
+                    }
+                ]
+            });
+
+            return res.status(200).json({
+                error: false,
+                tour
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    /**
+     * @static
+     * @desc  Reject tour
+     * @param {object} req express request object
+     * @param {object} res express response object
+     * @param next
+     * @returns {object} tour
+     * */
+    static async rejectTour(req, res, next) {
+        try {
+            let tour = await Tour.findByPk(req.params.id);
+
+            if (!tour) return res.status(404).json({
+                error: true,
+                msg: 'Tour not found'
+            });
+
+            if (req.user.id !== tour.user_id && req.user.role !== 'admin') return res.status(403).json({
+                msg: 'Permission denied'
+            });
+
+            await tour.update({isAvailable: false});
 
             tour = await Tour.findByPk(req.params.id, {
                 include: [

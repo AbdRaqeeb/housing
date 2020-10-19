@@ -51,7 +51,7 @@ class AdminController {
             await admin.save();
 
             const payload = {
-                id: admin.id,
+                id: admin.admin_id,
                 firstname: admin.firstname,
                 lastname: admin.lastname,
                 role: admin.role,
@@ -86,14 +86,15 @@ class AdminController {
             msg: 'Please upload an image'
         });
 
-        const image_url = await uploadImage(req.files.image, folders.admin);
+        const image = await uploadImage(req.files.image, folders.admin, 'owner');
 
-        const image = image_url.secure_url;
 
         try {
             let admin = await Admin.findByPk(req.user.id);
 
-            admin = await admin.update({image});
+            await admin.update({image});
+
+            admin = await Admin.findByPk(req.user.id);
 
 
             return res.status(200).json({

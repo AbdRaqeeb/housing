@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export function validateAdmin(admin, key) {
     const schema = Joi.object({
-        username: Joi.string().max(30).required(),
+        username: key ? Joi.string().max(30).optional() : Joi.string().max(30).required(),
         firstname: key ? Joi.string().optional() : Joi.string().required(),
         lastname: key ? Joi.string().optional() : Joi.string().required(),
         email: key ? Joi.string().optional().email() : Joi.string().required().email(),
@@ -16,7 +16,7 @@ export function validateAdmin(admin, key) {
 
 export function validateUser(user, key) {
     const schema = Joi.object({
-        username: Joi.string().max(30).required(),
+        username: key ? Joi.string().max(30).optional() : Joi.string().max(30).required(),
         firstname: key ? Joi.string().optional() : Joi.string().required(),
         lastname: key ? Joi.string().optional() : Joi.string().required(),
         email: key ? Joi.string().optional().email() : Joi.string().required().email(),
@@ -26,7 +26,7 @@ export function validateUser(user, key) {
         image: Joi.any().optional(),
         about: Joi.string().optional()
     });
-    return schema.validate(admin);
+    return schema.validate(user);
 }
 
 export function validateInquiry(inquiry) {
@@ -47,21 +47,20 @@ export function validateReview(review) {
         name: Joi.string().required(),
         message: Joi.string().required(),
         email: Joi.string().email().required(),
-        property_id: Joi.string().required()
+        property_id: Joi.number().required()
     });
     return schema.validate(review);
 }
 
-export function validateTour(tour) {
+export function validateTour(tour, key) {
     const schema = Joi.object({
-        name: Joi.string().required(),
-        email: Joi.string().required(),
-        phone: Joi.string().required(),
-        date: Joi.string().required(),
-        time: Joi.string().required(),
-        charges: Joi.string().required(),
-        user_id: Joi.string().required(),
-        property_id: Joi.string().required()
+        name:key ? Joi.string().optional() : Joi.string().required(),
+        email:key ? Joi.string().optional() : Joi.string().required(),
+        phone:key ? Joi.string().optional() : Joi.string().required(),
+        date:key ? Joi.string().optional() : Joi.string().required(),
+        time:key ? Joi.string().optional() : Joi.string().required(),
+        user_id:key ? Joi.number().optional() : Joi.number().required(),
+        property_id:key ? Joi.number().optional() : Joi.number().required()
     });
     return schema.validate(tour);
 }
@@ -78,8 +77,7 @@ export function validateProperty(property, key) {
         amenities: key ? Joi.array().optional() : Joi.array().required(),
         isAvailable: Joi.boolean().optional(),
         images: Joi.any().optional(),
-        reference: key ? Joi.string().optional() : Joi.string().required(),
-        isPaid: key ? Joi.boolean().optional() : Joi.boolean().required(),
+        isPaid: Joi.boolean().optional(),
         build_age: key ? Joi.string().optional() : Joi.string().required(),
         bathrooms: key ? Joi.number().optional() : Joi.number().required(),
         bedrooms: key ? Joi.number().optional() : Joi.number().required(),

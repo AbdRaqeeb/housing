@@ -1,9 +1,10 @@
 import bcrypt from 'bcryptjs';
-import {User} from '../../../database/models';
+import crypto from 'crypto';
+import {User, ResetToken} from '../../../database/models';
 import {validateUser, validatePassword} from "../../../middleware/validate";
-import {generateToken} from "../../../middleware/token";
 import folders from "../../../helpers/folders";
 import {uploadImage} from 'cloudinary-simple-upload';
+
 
 /**
  * User Controller
@@ -52,20 +53,9 @@ class UserController {
 
             await user.save();
 
-            const payload = {
-                id: user.id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                role: user.role,
-                email: user.email
-            };
-
-            // generate token
-            const token = generateToken(payload);
-
             res.status(200).json({
                 error: false,
-                token
+                msg: 'User registered successfully, please verify your email'
             });
         } catch (e) {
             next(e);
@@ -87,14 +77,13 @@ class UserController {
             msg: 'Please upload an image'
         });
 
-        const image_url = await uploadImage(req.files.image, folders.users);
-        const image = image_url.secure_url;
+        const image = await uploadImage(req.files.image, folders.users, 'owner');
         try {
             let user = await User.findByPk(req.user.id);
 
             await user.update({image});
 
-            user = await User.findByPk(user.id);
+            user = await User.findByPk(user.user_id);
 
             return res.status(200).json({
                 error: false,
@@ -124,12 +113,36 @@ class UserController {
 
             await user.update(req.body);
 
-            user = await User.findByPk(user.id);
+            user = await User.findByPk(user.user_id);
 
             return res.status(200).json({
                 error: false,
                 msg: 'Profile updated successfully',
                 user
+            })
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    /**
+     * @static
+     * @desc    Verify Email
+     * @param {object} req express request object
+     * @param {object} res express response object
+     * @param next
+     * @returns {object} verify email
+     * @access Private
+     * */
+    static async verifyEmail(req, res, next) {
+        try {
+            let user = await User.findByPk(req.params.id);
+
+            await user.update({isVerified: true});
+
+            return res.status(200).json({
+                error: false,
+                msg: 'Email verified successfully'
             })
         } catch (e) {
             next(e);
@@ -175,6 +188,56 @@ class UserController {
             next(e);
         }
 
+    }
+
+    /**
+     * @static
+     * @desc    Forgot password
+     * @param {object} req express request object
+     * @param {object} res express response object
+     * @param next
+     * @returns {object} user profile
+     * @access Private
+     * */
+    static async forgotPassword(req, res, next) {
+        const {email} = req.body;
+
+        try {
+            const user = await User.findOne({
+                where: {
+                    email
+                }
+            });
+
+            if (!user) return res.status(200).json({
+                msg: 'OK'
+            });
+
+            await ResetToken.update({
+                used: 1
+            }, {
+                where: {
+                    email: user.email
+                }
+            });
+
+            // create token
+            const token = await crypto.randomBytes(64).toString('base64');
+
+            //token expires after one hour
+            const expiration = new Date();
+            expiration.setDate(expiration.getDate() + 1/24);
+
+            await ResetToken.create({
+                used: 0,
+                token,
+                expiration,
+                email
+            });
+
+        } catch (e) {
+            next(e);
+        }
     }
 
 }

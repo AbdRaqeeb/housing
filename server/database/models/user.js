@@ -61,7 +61,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 isEmail: true
-            }
+            },
+            unique: true
         },
         phone: {
             type: DataTypes.STRING,
@@ -81,6 +82,11 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 min: 6
             }
+        },
+        isVerified: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         },
         image: {
             type: DataTypes.STRING,

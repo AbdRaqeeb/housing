@@ -68,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
         property_id: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        isAvailable: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     }, {
         sequelize,

@@ -42,6 +42,11 @@ class AuthController {
                 msg: 'Invalid password'
             });
 
+            if (user.isVerified === false) return res.status(401).json({
+                error: true,
+                msg: 'Please verify your account'
+            });
+
             const payload = {
                 id: user.user_id,
                 firstname: user.firstname,
@@ -174,6 +179,7 @@ class AuthController {
             next(e);
         }
     }
+
 
 }
 
