@@ -7,16 +7,16 @@ const redis_port = process.env.REDIS_PORT || 6565;
  * IN PRODUCTION
  * */
 // // Initiate redis client
-// const redis_client = redis.createClient(redis_port, process.env.REDIS_HOST);
-//
-// redis_client.auth(process.env.REDIS_PASSWORD, () => {
-//     console.log('Redis database connected');
-// });
+const redis_client = redis.createClient(redis_port, process.env.REDIS_HOST);
+
+redis_client.auth(process.env.REDIS_PASSWORD, () => {
+    console.log('Redis database connected');
+});
 
 /**
  * IN DEVELOPMENT
  * */
-const redis_client = redis.createClient(redis_port);
+// const redis_client = redis.createClient(redis_port);
 
 
 export async function addToCache(id, data) {
