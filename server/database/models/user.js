@@ -96,6 +96,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: 'user'
+        },
+        resetLink: {
+            type: DataTypes.STRING,
+            defaultValue: ''
         }
     }, {
         sequelize,

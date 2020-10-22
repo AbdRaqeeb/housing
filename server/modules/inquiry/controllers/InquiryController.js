@@ -1,6 +1,9 @@
+import axios from 'axios';
 import {Property, Inquiry, User} from '../../../database/models';
 import {validateInquiry} from "../../../middleware/validate";
 import {addToCache} from "../../../middleware/cache";
+import headers from "../../../utils/headers";
+const URL = "https://notification-ng.herokuapp.com";
 
 /**
  * Inquiry controllers
@@ -32,6 +35,23 @@ class InquiryController {
             });
 
             await inquiry.save();
+
+            const user = await User.findByPk(user_id);
+
+            const property = await Property.findByPk(property_id);
+
+            const formData = {
+                user_name: user.firstname,
+                reference: property.reference,
+                email: user.email,
+                title: property.title,
+                c_email: inquiry.email,
+                message: inquiry.message,
+                phone: inquiry.phone,
+                customer_name: inquiry.name
+            };
+
+            await axios.post(`${URL}/api/v1/notification/inquiry`, formData, headers);
 
             return res.status(201).json({
                 error: false,

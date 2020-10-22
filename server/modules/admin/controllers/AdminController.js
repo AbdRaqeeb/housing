@@ -59,7 +59,7 @@ class AdminController {
             };
 
             // generate token
-            const token = generateToken(payload);
+            const token = generateToken(payload, process.env.JWT_SECRET);
 
             res.status(201).json({
                 error: false,

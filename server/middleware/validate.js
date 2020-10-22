@@ -98,6 +98,13 @@ export function validatePassword(password) {
     return schema.validate(password);
 }
 
+export function validatePasswordReset(password) {
+    const schema = Joi.object({
+        password: Joi.string().min(6).required()
+    });
+    return schema.validate(password);
+}
+
 export function validateLogin(user) {
     const schema = Joi.object({
         username: Joi.string().required(),

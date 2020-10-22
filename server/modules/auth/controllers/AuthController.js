@@ -56,7 +56,7 @@ class AuthController {
             };
 
             // generate token
-            const token = generateToken(payload);
+            const token = generateToken(payload, process.env.JWT_SECRET);
 
             res.status(200).json({
                 error: false,
@@ -111,7 +111,7 @@ class AuthController {
             };
 
             // generate token
-            const token = generateToken(payload);
+            const token = generateToken(payload, process.env.JWT_SECRET);
 
             res.status(200).json({
                 error: false,

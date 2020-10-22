@@ -1,10 +1,13 @@
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import {User, ResetToken} from '../../../database/models';
-import {validateUser, validatePassword} from "../../../middleware/validate";
+import axios from 'axios';
+import {verify} from 'jsonwebtoken';
+import {User} from '../../../database/models';
+import {validateUser, validatePassword, validatePasswordReset} from "../../../middleware/validate";
+import {generateToken, generateTokenReset} from "../../../middleware/token";
 import folders from "../../../helpers/folders";
 import {uploadImage} from 'cloudinary-simple-upload';
-
+import headers from "../../../utils/headers";
+const URL = "https://notification-ng.herokuapp.com";
 
 /**
  * User Controller
@@ -52,6 +55,19 @@ class UserController {
             user.password = bcrypt.hashSync(password, salt);
 
             await user.save();
+
+            const payload = {
+                id: user.user_id
+            };
+
+            const token = generateToken(payload, process.env.JWT_ACTIVATE_ACCOUNT);
+
+            const formData = {
+                email: user.email,
+                token
+            };
+
+            await axios.post(`${URL}/api/v1/notification/verify`, formData, headers);
 
             res.status(200).json({
                 error: false,
@@ -135,15 +151,24 @@ class UserController {
      * @access Private
      * */
     static async verifyEmail(req, res, next) {
+        const {token} = req.params;
         try {
-            let user = await User.findByPk(req.params.id);
+            await verify(token, process.env.JWT_ACTIVATE_ACCOUNT, async (err, decoded) => {
+                if (err) return res.status(400).json({
+                    error: true,
+                    msg: 'Incorrect or expired link'
+                });
 
-            await user.update({isVerified: true});
+                const {id} = decoded;
+                let user = await User.findByPk(id);
 
-            return res.status(200).json({
-                error: false,
-                msg: 'Email verified successfully'
-            })
+                await user.update({isVerified: true});
+
+                return res.status(200).json({
+                    error: false,
+                    msg: 'Email verified successfully'
+                })
+            });
         } catch (e) {
             next(e);
         }
@@ -196,7 +221,7 @@ class UserController {
      * @param {object} req express request object
      * @param {object} res express response object
      * @param next
-     * @returns {object} user profile
+     * @returns {object} reset token and email
      * @access Private
      * */
     static async forgotPassword(req, res, next) {
@@ -213,28 +238,88 @@ class UserController {
                 msg: 'OK'
             });
 
-            await ResetToken.update({
-                used: 1
-            }, {
-                where: {
-                    email: user.email
-                }
-            });
+            const payload = {
+                id: user.user_id
+            };
 
-            // create token
-            const token = await crypto.randomBytes(64).toString('base64');
+            const token = generateTokenReset(payload, process.env.JWT_RESET_PASSWORD);
 
-            //token expires after one hour
-            const expiration = new Date();
-            expiration.setDate(expiration.getDate() + 1/24);
-
-            await ResetToken.create({
-                used: 0,
+            const formData = {
                 token,
-                expiration,
-                email
+                email: user.email
+            };
+
+            await axios.post(`${URL}/api/v1/notification/password`, formData, headers);
+
+
+            await user.update({
+                resetLink: token
             });
 
+            return res.status(200).json({
+                error: false,
+                msg: 'Password reset link has been sent to your email...'
+            });
+
+
+        } catch (e) {
+            next(e);
+        }
+    }
+
+
+    /**
+     * @static
+     * @desc    Reset password
+     * @param {object} req express request object
+     * @param {object} res express response object
+     * @param next
+     * @access Private
+     * */
+    static async resetPassword(req, res, next) {
+        const {error} = validatePasswordReset(req.body);
+        if (error) return res.status(400).json(error.details[0].message);
+
+        const {password} = req.body;
+        const {token} = req.params;
+
+        try {
+            if (!token) return res.status(400).json({
+                error: true,
+                msg: 'Authentication error'
+            });
+
+            await verify(token, process.env.JWT_RESET_PASSWORD, async (err, decoded) => {
+               if (err) return res.status(401).json({
+                   error: true,
+                   msg: 'Invalid or expired token'
+               });
+
+               const user = await User.findOne({
+                   where: {
+                       resetLink: token
+                   }
+               });
+
+               if (!user) return res.status(400).json({
+                   error: true,
+                   msg: 'Account not found'
+               });
+
+                // Hash password before saving
+                const salt = bcrypt.genSaltSync(10);
+                const hashPassword = bcrypt.hashSync(password, salt);
+
+
+               await user.update({
+                   password: hashPassword
+               });
+
+               return res.status(200).json({
+                   error: false,
+                   msg: 'Password changed successfully'
+               });
+            });
         } catch (e) {
             next(e);
         }

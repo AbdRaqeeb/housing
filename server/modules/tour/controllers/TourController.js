@@ -1,7 +1,10 @@
+import axios from 'axios';
 import {Tour, Payment, User, Property} from '../../../database/models';
 import {validateTour} from "../../../middleware/validate";
 import {addToCache} from "../../../middleware/cache";
 import db from '../../../database/models/index';
+import headers from "../../../utils/headers";
+const URL = "https://notification-ng.herokuapp.com";
 
 /**
  * Tour controllers
@@ -44,6 +47,23 @@ class TourController {
 
                 return tour;
             });
+
+            const user = await User.findByPk(user_id);
+            const property = await Property.findByPk(property_id);
+
+            const formData = {
+                email: user.email,
+                user_name: user.firstname,
+                customer_name: new_tour.name,
+                charges: new_tour.charges,
+                date: `${new_tour.date}`.slice(0, 15),
+                time: new_tour.time,
+                phone: new_tour.phone,
+                title: property.title,
+                reference: property.reference
+            };
+
+            await axios.post(`${URL}/api/v1/notification/tour`, formData, headers);
 
             return res.status(201).json({
                 error: false,
@@ -256,7 +276,7 @@ class TourController {
             });
 
             if (req.user.id !== tour.user_id && req.user.role !== 'admin') return res.status(403).json({
-               msg: 'Permission denied'
+                msg: 'Permission denied'
             });
 
             await tour.update({isAvailable: true});
